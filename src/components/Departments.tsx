@@ -5,24 +5,12 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Box from "@mui/material/Box";
 import data from "../data/data.json";
 
-interface DepartmentData {
-  department: string;
-  sub_departments: string[];
-}
-
-interface Props {
-  data: DepartmentData[];
-}
-
-const DepartmentCheckboxList: React.FC<Props> = () => {
-  const [selected, setSelected] = useState<{
-    [key: string]: boolean | "indeterminate";
-  }>({});
+const DepartmentCheckboxList: React.FC = () => {
+  const [selected, setSelected] = useState<{ [key: string]: boolean }>({});
 
   const handleDepartmentSelect = (department: string) => {
     const newSelected = { ...selected };
-    const isDepartmentSelected =
-      selected[department] === "indeterminate" || selected[department] === true;
+    const isDepartmentSelected = selected[department] === true;
 
     newSelected[department] = !isDepartmentSelected;
     data
@@ -57,6 +45,19 @@ const DepartmentCheckboxList: React.FC<Props> = () => {
     setSelected(newSelected);
   };
 
+  const isDepartmentIndeterminate = (department: string) => {
+    const subDepartments = data.find(
+      (dept) => dept.department === department
+    )!.sub_departments;
+    const selectedSubDepartments = subDepartments.filter(
+      (subDept) => selected[subDept]
+    );
+    return (
+      selectedSubDepartments.length > 0 &&
+      selectedSubDepartments.length < subDepartments.length
+    );
+  };
+
   return (
     <FormGroup>
       {data.map((department) => (
@@ -73,9 +74,7 @@ const DepartmentCheckboxList: React.FC<Props> = () => {
             control={
               <Checkbox
                 checked={selected[department.department] === true}
-                indeterminate={
-                  selected[department.department] === "indeterminate"
-                }
+                indeterminate={isDepartmentIndeterminate(department.department)}
                 onChange={() => handleDepartmentSelect(department.department)}
               />
             }
